@@ -5,7 +5,7 @@ const users = require('./userDb');
 const posts = require('../posts/postDb');
 const router = express.Router();
 
-router.post('/', (req, res) => {
+router.post('/', validateUser, (req, res) => {
   // Create a new User:
   const newUser = req.body;
   console.log(newUser);
@@ -24,7 +24,7 @@ router.post('/', (req, res) => {
     });
 });
 
-router.post('/:id/posts', validateUserId, (req, res) => {
+router.post('/:id/posts', validateUserId, validatePost, (req, res) => {
   // Create a post for the user:
   const newPost = { ...req.body, user_id: req.params.id };
   posts
@@ -120,11 +120,27 @@ function validateUserId(req, res, next) {
 }
 
 function validateUser(req, res, next) {
-  // do your magic!
+  // Validate User:
+  const data = req.body;
+  if (!data) {
+    res.status(400).send({ FATAL: 'MISSING USER DATA' });
+  } else if (!data.name) {
+    res.status(400).send({ FATAL: 'MISSING NAME' });
+  } else {
+    next();
+  }
 }
 
 function validatePost(req, res, next) {
-  // do your magic!
+  // Validate a Post:
+  const data = req.body;
+  if (!data) {
+    res.status(400).send({ FATAL: 'MISSING POST DATA' });
+  } else if (!data.text) {
+    res.status(400).send({ FATAL: 'MISSING TEXT OF POST' });
+  } else {
+    next();
+  }
 }
 
 module.exports = router;
